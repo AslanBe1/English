@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>So'z O'rgatuvchi (Ultimate Fix)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 30px;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        /* BO'LIMLAR */
+        .section { display: none; animation: fadeIn 0.4s; }
+        .section.active { display: block; }
+
+        @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #4b5563; font-size: 0.9rem; }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        textarea:focus { border-color: var(--primary); outline: none; }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+
+        .btn:hover { background: var(--primary-hover); }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .btn-secondary { background: #6b7280; margin-top: 10px; }
+        .btn-secondary:hover { background: #4b5563; }
+
+        /* RO'YHAT KO'Rinishi */
+        .word-list {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.95rem;
+        }
+        .word-item:last-child { border-bottom: none; }
+        .word-en { font-weight: bold; color: var(--primary); }
+        .word-uz { color: #4b5563; }
+
+        /* TEST MAYDONI */
+        .quiz-card {
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .question-word {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text);
+            margin: 30px 0;
+            text-transform: capitalize;
+            word-wrap: break-word;
+        }
+
+        .input-answer {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .feedback {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            min-height: 1.5em;
+            line-height: 1.5;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📚 So'z O'rgatuvchi</h1>
+
+        <!-- 1. INPUT SECTION -->
+        <div id="section-input" class="section active">
+            <label>O'rganmoqchi bo'lgan so'zlarni yozing (Har birini yangi qatordan):</label>
+            <textarea id="input-words" placeholder="Apple&#10;Banana&#10;Computer&#10;School"></textarea>
+            <button class="btn" onclick="processTranslation()">🔄 Tarjima qilish va Saqlash</button>
+        </div>
+
+        <!-- 2. LIST SECTION -->
+        <div id="section-list" class="section">
+            <h3 style="margin-bottom:10px; text-align:center;">Tarjima qilingan so'zlar:</h3>
+            <div class="word-list" id="word-list-display">
+                <!-- JS to'ldiradi -->
+            </div>
+            <button class="btn" onclick="startQuiz()">🎯 Testni Boshlash</button>
+            <button class="btn btn-secondary" onclick="resetApp()">🔙 Boshqa so'zlar kiritish</button>
+        </div>
+
+        <!-- 3. QUIZ SECTION -->
+        <div id="section-quiz" class="section">
+            <div class="progress-bar"><div class="progress-fill" id="quiz-progress"></div></div>
+            
+            <div class="quiz-card">
+                <p style="color:#666; font-size:0.9rem;">Bu so'zning o'zbekchasini yozing:</p>
+                <div class="question-word" id="quiz-question">Word</div>
+                
+                <input type="text" class="input-answer" id="quiz-answer" placeholder="Javobni yozing..." autocomplete="off">
+                
+                <div class="feedback" id="quiz-feedback"></div>
+                
+                <button class="btn" onclick="checkAnswer()">Javobni Tekshirish</button>
+                <button class="btn btn-secondary" id="next-btn" style="display:none;" onclick="nextQuestion()">Keyingi Savol ➡</button>
+            </div>
+            
+            <button class="btn btn-secondary" style="margin-top:20px; background: transparent; color:#666; border:1px solid #ccc;" onclick="showSection('section-list')">Testni tugatish</button>
+        </div>
+
+        <!-- LOADING OVERLAY -->
+        <div class="loading-overlay" id="loader" style="display:none;">
+            <div class="spinner"></div>
+            <p id="loading-text">Tarjima qilinmoqda...</p>
+        </div>
+    </div>
+
+    <script>
+        // Global o'zgaruvchilar
+        let wordsData = []; 
+        let quizQueue = []; 
+        let currentIndex = 0;
+        let score = 0;
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // --- MUHIM FIX: SUPER TOZALASH FUNKSIYASI ---
+        // U faqat harflarni va bo'shliqlarni qoldiradi, qolgan hammasini (nuqta, vergul, apostrof, belgilar) o'chiradi.
+        function cleanText(text) {
+            if (!text) return "";
+            // 1. Kichik harfga o'tkazish
+            let cleaned = text.toLowerCase();
+            // 2. Hamma belgilarni (a-z dan va bo'shliqdan tashqari) olib tashlash
+            // Bu shuni ta'minlaydi: "Qo'rqaman", "qo rqaman", "Qo'rqaman." hammasi bir xil "qo rqaman" bo'ladi.
+            cleaned = cleaned.replace(/[^a-z\s]/g, ""); 
+            // 3. Orticha bo'shliqlarni bittaga qisqartirish
+            cleaned = cleaned.replace(/\s+/g, " ").trim();
+            return cleaned;
+        }
+
+        // 1-QISM: SO'ZLARNI TARJIMA QILISH
+        async function processTranslation() {
+            const input = document.getElementById('input-words').value;
+            if (!input.trim()) {
+                alert("Iltimos, kamida bitta so'z yozing!");
+                return;
+            }
+
+            const lines = input.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length === 0) return;
+
+            const loader = document.getElementById('loader');
+            const loadingText = document.getElementById('loading-text');
+            loader.style.display = 'flex';
+            wordsData = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const word = lines[i];
+                const shortWord = word.split(' ')[0]; 
+                loadingText.textContent = `${shortWord} so'zi tarjima qilinmoqda (${i+1}/${lines.length})...`;
+                
+                try {
+                    const translation = await translateWord(shortWord);
+                    wordsData.push({ en: shortWord, uz: translation });
+                } catch (err) {
+                    console.error("Xatolik:", word);
+                    wordsData.push({ en: shortWord, uz: "Xatolik ❌" });
+                }
+                await new Promise(r => setTimeout(r, 600));
+            }
+
+            loader.style.display = 'none';
+            renderList();
+            showSection('section-list');
+        }
+
+        async function translateWord(word) {
+            const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|uz`;
+            const res = await fetch(apiUrl);
+            const data = await res.json();
+            if(data.responseStatus === 403 || data.responseStatus === 429) {
+                return "Limit tugadi";
+            }
+            return data.responseData.translatedText;
+        }
+
+        function renderList() {
+            const listDiv = document.getElementById('word-list-display');
+            listDiv.innerHTML = '';
+            wordsData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'word-item';
+                div.innerHTML = `<span class="word-en">${item.en}</span> <span class="word-uz">➝ ${item.uz}</span>`;
+                listDiv.appendChild(div);
+            });
+        }
+
+        function resetApp() {
+            document.getElementById('input-words').value = '';
+            wordsData = [];
+            showSection('section-input');
+        }
+
+        // 2-QISM: TEST LOGIC
+        function startQuiz() {
+            quizQueue = [...wordsData];
+            quizQueue.sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            score = 0;
+            showSection('section-quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= quizQueue.length) {
+                const percent = Math.round((score / quizQueue.length) * 100);
+                alert(`Test tugadi! Natija: ${score}/${quizQueue.length} (${percent}%)`);
+                showSection('section-list');
+                return;
+            }
+
+            const current = quizQueue[currentIndex];
+            document.getElementById('quiz-question').textContent = current.en;
+            document.getElementById('quiz-answer').value = '';
+            document.getElementById('quiz-answer').focus();
+            document.getElementById('quiz-feedback').textContent = '';
+            document.getElementById('quiz-feedback').className = 'feedback';
+            
+            document.querySelector('#section-quiz button.btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const percent = ((currentIndex) / quizQueue.length) * 100;
+            document.getElementById('quiz-progress').style.width = percent + '%';
+        }
+
+        function checkAnswer() {
+            const userRaw = document.getElementById('quiz-answer').value;
+            const userClean = cleanText(userRaw);
+            
+            const rawCorrectAns = quizQueue[currentIndex].uz;
+            const feedback = document.getElementById('quiz-feedback');
+
+            // To'g'ri javobni vergula bo'yicha bo'lib, har birini tozalab olamiz
+            // Masalan: "Mashina, Avtomobil" -> ["mashina", "avtomobil"]
+            const possibleAnswers = rawCorrectAns.split(',')
+                .map(ans => cleanText(ans));
+
+            // Bitta variant ham mos keladimi?
+            let isCorrect = possibleAnswers.some(ans => ans === userClean);
+
+            if (isCorrect) {
+                feedback.textContent = "✅ To'g'ri!";
+                feedback.style.color = "var(--success)";
+                score++;
+            } else {
+                // Xato bo'lsa, nima uchunligini ko'rsatish (debug uchun)
+                feedback.innerHTML = `❌ Xato.<br>Siz yozdingiz: <b>${userRaw}</b> (${userClean})<br>To'g'ri javob: <b>${rawCorrectAns}</b>`;
+                feedback.style.color = "var(--danger)";
+            }
+
+            document.querySelector('#section-quiz button.btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            
+            document.getElementById('quiz-answer').onkeypress = function(e) {
+                if(e.key === 'Enter') nextQuestion();
+            };
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>
